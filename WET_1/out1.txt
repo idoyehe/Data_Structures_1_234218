@@ -1,0 +1,42 @@
+Init done.
+AddTrainer: SUCCESS
+AddTrainer: SUCCESS
+BuyGladiator: SUCCESS
+AddTrainer: SUCCESS
+BuyGladiator: FAILURE
+BuyGladiator: SUCCESS
+Gladiator with highest level is: 101
+LevelUp: SUCCESS
+Level	||	Gladiator
+1	||	102
+2	||	101
+and there are no more gladiators!
+FreeGladiator: SUCCESS
+Level	||	Gladiator
+1	||	101
+and there are no more gladiators!
+Gladiator with highest level is: -1
+UpgradeGladiator: SUCCESS
+Gladiator with highest level is: 105
+UpgradeGladiator: SUCCESS
+BuyGladiator: SUCCESS
+BuyGladiator: SUCCESS
+Level	||	Gladiator
+1	||	101
+2	||	120
+3	||	105
+and there are no more gladiators!
+Level	||	Gladiator
+1	||	101
+2	||	105
+and there are no more gladiators!
+Level	||	Gladiator
+1	||	120
+and there are no more gladiators!
+UpdateLevels: SUCCESS
+Level	||	Gladiator
+1	||	120
+2	||	101
+3	||	105
+and there are no more gladiators!
+Quit done.

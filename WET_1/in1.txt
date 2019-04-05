@@ -1,0 +1,24 @@
+Init
+AddTrainer 4
+AddTrainer 3
+BuyGladiator 101 4 50
+AddTrainer 5
+BuyGladiator 101 5 25
+BuyGladiator 102 5 25
+GetTopGladiator -1
+LevelUp 102 26
+GetAllGladiatorsByLevel -1
+FreeGladiator 102
+GetAllGladiatorsByLevel -1
+GetTopGladiator 5
+UpgradeGladiator 101 105
+GetTopGladiator -1
+UpgradeGladiator 105 101
+BuyGladiator 105 4 5
+BuyGladiator 120 5 15
+GetAllGladiatorsByLevel -1
+GetAllGladiatorsByLevel 4
+GetAllGladiatorsByLevel 5
+UpdateLevels 5 4
+GetAllGladiatorsByLevel -1
+Quit

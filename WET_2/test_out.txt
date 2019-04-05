@@ -1,0 +1,20 @@
+init done.
+addGladiator: FAILURE
+addTrainingGroup: FAILURE
+addTrainingGroup: INVALID_INPUT
+addTrainingGroup: SUCCESS
+addGladiator: SUCCESS
+addGladiator: SUCCESS
+addGladiator: FAILURE
+addGladiator: SUCCESS
+getMinTrainingGroup: SUCCESS 0
+trainingGroupFight: FAILURE
+trainingGroupFight: SUCCESS
+getMinTrainingGroup: SUCCESS 1
+trainingGroupFight: FAILURE
+addGladiator: SUCCESS
+addGladiator: SUCCESS
+trainingGroupFight: SUCCESS
+trainingGroupFight: FAILURE
+getMinTrainingGroup: SUCCESS 1
+quit done.

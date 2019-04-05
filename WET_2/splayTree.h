@@ -1,0 +1,273 @@
+#ifndef DATASRUCTURES_SPLAYTREE_H
+#define DATASRUCTURES_SPLAYTREE_H
+#include <cassert>
+#include <exception>
+#include <new>
+#include <stdlib.h>
+
+namespace splayTree {
+
+    typedef enum {
+        ST_SUCCESS = 0,
+        ST_FAILURE = -1,
+        ST_ALLOCATION_ERROR = -2
+    } StatusTree;
+
+    template <class T>
+    class SplayTree {
+    private:
+/************************* begin of Vertex implementation**********************/
+        class Vertex {
+        private:
+            T data;
+            Vertex *leftV;
+            Vertex *rightV;
+
+            /*
+             * rotating the vertex to the left
+             */
+            Vertex *LL_Rotate() {
+                assert(this->leftV != NULL);
+                Vertex *temp = this->leftV;
+                this->leftV = temp->rightV;
+                temp->rightV = this;
+                return temp;
+            }
+
+            /*
+             * rotating the vertex to the right
+             */
+            Vertex *RR_Rotate() {
+                assert(this->rightV != NULL);
+                Vertex *temp = this->rightV;
+                this->rightV = temp->leftV;
+                temp->leftV = this;
+                return temp;
+            }
+
+        public:
+            /*constructor*/
+            Vertex(const T& data) : data(data), leftV(NULL), rightV(NULL) {};
+
+            /*
+            * destructor of the vertex removing all sub vertices recursively
+            */
+            ~Vertex() {
+                delete (this->leftV);
+                delete (this->rightV);
+            }
+
+            /*return const reference to the data in the vertex*/
+            const T& getData() const {
+                return this->data;
+            }
+
+            /*return reference to the data in the vertex*/
+            T* getDataRef()  {
+                return &(this->data);
+            }
+
+            /*get reference of a key and splay it's vertex to the root,
+             * if not found splay the last vertex reached*/
+            Vertex* find(const T& key) {
+                //base case: the key is in the root or the tree is empty
+                if (this->getData() == key) {
+                    return this;
+                }
+                //case: the required key is on the left side of the root
+                if (this->getData() > key) {
+
+                    //case: left sub tree does NOT exist
+                    if (this->leftV == NULL) return this;
+
+                    //key is in the left vertex sub tree
+                    if (this->leftV->getData() != key) {
+                        this->leftV = this->leftV->find(key);
+                    }
+                    return this->LL_Rotate();
+
+                }
+                assert(this->getData() < key);
+                //case: right sub tree does NOT exist
+                if (this->rightV == NULL) return this;
+
+                //key is in the right vertex sub tree
+                if (this->rightV->getData() != key) {
+                    this->rightV = this->rightV->find(key);
+                }
+                return this->RR_Rotate();
+            }
+
+            /*find the min key vertex and splay it all the way to the root*/
+            Vertex *findMin() {
+                if (this->leftV == NULL) {
+                    return this;
+                }
+                this->leftV = this->leftV->findMin();
+                return this->LL_Rotate();
+            }
+
+            /*find the max key vertex and splay it all the way to the root*/
+            Vertex *findMax() {
+                if (this->rightV == NULL) {
+                    return this;
+                }
+                this->rightV = this->rightV->findMax();
+                return this->RR_Rotate();
+            }
+
+            /*join 2 splay trees to one big tree
+             * ASSERTION: key(x)<key(y) for all x in this and all y in root
+             */
+            Vertex *join(Vertex *root2) {
+                assert(root2 != NULL);
+                Vertex *root1 = this->findMax();
+                root1->rightV = root2;
+                return root1;
+            }
+
+            /*split this tree to 2 trees trees by the pivot and export them into 2 pointers
+             * key(x) <= pivot for all x in t1
+             * key(y)> pivot for all y in t2
+             */
+            void split(Vertex **t1, Vertex **t2, const T& pivot){
+                assert(t1 != NULL && t2 != NULL);
+                *t1 = this->find(pivot);
+                if ((*t1)->getData() < pivot || (*t1)->getData() == pivot ) {
+                    *t2 = (*t1)->rightV;
+                    (*t1)->rightV = NULL;
+                } else {
+                    *t2 = *t1;
+                    *t1 = (*t2)->leftV;
+                    (*t2)->leftV = NULL;
+                }
+                return;
+            }
+
+            /*insert new allocated vertex into the root
+             * of the tree by using split*/
+            Vertex *insertV(Vertex *vertexToInsert){
+                Vertex *t1 = NULL;
+                Vertex *t2 = NULL;
+                this->split(&t1, &t2, vertexToInsert->getData());
+                vertexToInsert->leftV = t1;
+                vertexToInsert->rightV = t2;
+                return vertexToInsert;
+            }
+
+            /*removing the root of the tree, by using join,
+             * BUT does NOT deallocate it, export it by pointer*/
+            Vertex *removeRoot(Vertex **oldRoot) {
+                assert(oldRoot != NULL);
+                *oldRoot=this;
+                if(this->leftV == NULL) {//case: only right sub tree
+                    Vertex* newRoot = this->rightV;
+                    this->leftV = NULL;
+                    this->rightV = NULL;
+                    return newRoot;
+                }
+                if(this->rightV == NULL) {//case: only left sub tree
+                    Vertex* newRoot = this->leftV;
+                    this->leftV = NULL;
+                    this->rightV = NULL;
+                    return newRoot;
+                }
+                //case: two sub trees
+                Vertex* newRoot = this->leftV->join(this->rightV);
+                this->leftV = NULL;
+                this->rightV = NULL;
+                return newRoot;
+            }
+        };
+
+/************************* end of Vertex implementation**********************/
+        Vertex* root;
+        int size;
+/********************begin Splay Tree implementation***************************/
+    public:
+        /*constructor of the splay tree*/
+        explicit SplayTree() : root(NULL), size(0) {}
+
+        /*get a reference to key and try to find it in the tree using vertex find function*/
+        StatusTree find(const T& key) {
+            if (this->root==NULL){
+                return ST_FAILURE;
+            }
+            this->root = this->root->find(key);
+            if (this->getRoot() ==  key){
+                return ST_SUCCESS;
+            }
+            return ST_FAILURE;
+        }
+
+        /*insert a key to the tree, it does NOT check if the key already inside!! update max and size as well
+        * ALLOCATION_ERROR-> when allocating new vertex fails
+        * SUCCESS -> when the key inserted to the tree*/
+        StatusTree insertKey(const T& key) {
+            if (this->root != NULL && this->find(key)==ST_SUCCESS){
+                return ST_FAILURE;
+            }
+            try {
+                Vertex* vertexToInsert = new Vertex(key);
+                if (this->root == NULL) {
+                    this->root = vertexToInsert;
+                    this->size++;
+                    return ST_SUCCESS;
+                }
+                this->root = this->root->insertV(vertexToInsert);
+                this->size++;
+                assert(root==vertexToInsert);
+                return ST_SUCCESS;
+            }catch (const std::bad_alloc&) {
+                return ST_ALLOCATION_ERROR;
+            }
+        }
+
+        /*gets a reference to key and splay it to the root and remove it using vertex remove root function
+         * FAILURE-> when key does NOT found
+         * SUCCESS-> remove successfully from the tree*/
+        StatusTree deleteKey(const T& duplicateKey) {
+            if (this->root != NULL && this->find(duplicateKey) == ST_FAILURE) {
+                return ST_FAILURE;
+            }
+            assert(this->getRoot() ==  duplicateKey);
+            Vertex* oldRoot = NULL;
+            this->root = this->root->removeRoot(&oldRoot);
+            assert(oldRoot->getData() ==  duplicateKey);
+            this->size--;
+            delete(oldRoot);
+            return ST_SUCCESS;
+        }
+
+        /*return the size of the tree*/
+        int getSize() const {
+            return this->size;
+        }
+
+        /*return a reference to the root key in the tree
+         * ASSERTION: the tree is NOT empty and the user does NOT chenge the ID of tyhe key*/
+        const T* getRootRef() const{
+            assert(this->root != NULL);
+            return this->root->getDataRef();
+        }
+
+        /*return a const reference to the root key in the tree
+        * ASSERTION: the tree is NOT empty*/
+        const T& getRoot() const {
+            assert(this->root != NULL);
+            return this->root->getData();
+        }
+
+        /*return true if the tree is empty otherwise false*/
+        bool isEmpty()const {
+            return this->getSize()==0;
+        }
+
+        /*recursive destructor using vertex destructor*/
+        ~SplayTree() {
+            delete (this->root);
+        }
+
+    };
+}
+#endif//DATASRUCTURES_SPLAYTREE_H
